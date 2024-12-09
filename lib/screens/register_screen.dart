@@ -1,26 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class LoginScreen extends StatefulWidget {
+class RegisterScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _RegisterScreenState createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _auth = FirebaseAuth.instance;
 
-  Future<void> _login() async {
+  String _passwordStrength = "";
+
+  void _checkPasswordStrength(String password) {
+    if (password.length < 6) {
+      setState(() {
+        _passwordStrength = "Weak";
+      });
+    } else if (password.length < 10) {
+      setState(() {
+        _passwordStrength = "Medium";
+      });
+    } else {
+      setState(() {
+        _passwordStrength = "Strong";
+      });
+    }
+  }
+
+  Future<void> _register() async {
     try {
-      await _auth.signInWithEmailAndPassword(
+      await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      Navigator.pushReplacementNamed(context, '/home');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Registration Successful!')),
+      );
+      Navigator.pushReplacementNamed(context, '/');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login Failed: $e')),
+        SnackBar(content: Text('Registration Failed: $e')),
       );
     }
   }
@@ -33,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue, Colors.purple],
+            colors: [Colors.orange, Colors.red],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -52,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  "Welcome to Stock Tracker",
+                  "Create an Account",
                   style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -67,7 +90,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     fillColor: Colors.white,
                     filled: true,
                   ),
-                  keyboardType: TextInputType.emailAddress,
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    border: OutlineInputBorder(),
+                    fillColor: Colors.white,
+                    filled: true,
+                  ),
                 ),
                 SizedBox(height: 20),
                 TextField(
@@ -79,6 +111,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     filled: true,
                   ),
                   obscureText: true,
+                  onChanged: _checkPasswordStrength,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Password Strength: $_passwordStrength",
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: _phoneController,
+                  decoration: InputDecoration(
+                    labelText: 'Phone Number',
+                    border: OutlineInputBorder(),
+                    fillColor: Colors.white,
+                    filled: true,
+                  ),
                 ),
                 SizedBox(height: 30),
                 ElevatedButton(
@@ -88,16 +136,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  onPressed: _login,
-                  child: Text('Login'),
+                  onPressed: _register,
+                  child: Text('Register'),
                 ),
                 SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/register');
+                    Navigator.pushReplacementNamed(context, '/');
                   },
                   child: Text(
-                    "Don’t have an account? Register",
+                    "Already have an account? Login",
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

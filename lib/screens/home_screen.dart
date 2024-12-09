@@ -4,22 +4,12 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Stock Tracker')),
-      body: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context, '/watchlist'),
-            child: Text('Go to Watchlist'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context, '/newsfeed'),
-            child: Text('View Newsfeed'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context, '/stock_details'),
-            child: Text('Stock Details'),
-          ),
-        ],
+      appBar: AppBar(title: Text('Welcome to Stock Tracker')),
+      body: Center(
+        child: Text(
+          'You are logged in!',
+          style: TextStyle(fontSize: 18),
+        ),
       ),
     );
   }

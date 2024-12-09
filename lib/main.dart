@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/stock_details_screen.dart';
-import 'screens/watchlist_screen.dart';
-import 'screens/newsfeed_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,10 +19,8 @@ class StockTrackerApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => LoginScreen(),
+        '/register': (context) => RegisterScreen(),
         '/home': (context) => HomeScreen(),
-        '/stock_details': (context) => StockDetailsScreen(),
-        '/watchlist': (context) => WatchlistScreen(),
-        '/newsfeed': (context) => NewsfeedScreen(),
       },
     );
   }
