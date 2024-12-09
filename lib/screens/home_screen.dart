@@ -111,49 +111,70 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Explore Stock Genius',
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.teal),
-            ),
-            SizedBox(height: 20),
-            Expanded(
-              child: GridView(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16.0,
-                  crossAxisSpacing: 16.0,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade200, Colors.teal.shade700],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // App Logo
+              Center(
+                child: Image.asset(
+                  'assets/appLogo.png',
+                  height: 100,
+                  width: 100,
                 ),
-                children: [
-                  _buildNavigationCard(
-                    title: "Newsfeed",
-                    icon: Icons.article,
-                    color: Colors.blueAccent,
-                    onTap: () => Navigator.pushNamed(context, '/newsfeed'),
-                  ),
-                  _buildNavigationCard(
-                    title: "Watchlist",
-                    icon: Icons.list,
-                    color: Colors.greenAccent,
-                    onTap: () => Navigator.pushNamed(context, '/watchlist'),
-                  ),
-                  _buildNavigationCard(
-                    title: "Stock Details",
-                    icon: Icons.bar_chart,
-                    color: Colors.orangeAccent,
-                    onTap: () => Navigator.pushNamed(context, '/stock_details'),
-                  ),
-                ],
               ),
-            ),
-          ],
+              SizedBox(height: 20),
+              Center(
+                child: Text(
+                  "Welcome to Stock Genius",
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ),
+              SizedBox(height: 20),
+              Expanded(
+                child: GridView(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16.0,
+                    crossAxisSpacing: 16.0,
+                  ),
+                  children: [
+                    _buildNavigationCard(
+                      title: "Newsfeed",
+                      icon: Icons.article,
+                      color: Colors.blueAccent,
+                      onTap: () => Navigator.pushNamed(context, '/newsfeed'),
+                    ),
+                    _buildNavigationCard(
+                      title: "Watchlist",
+                      icon: Icons.list,
+                      color: Colors.greenAccent,
+                      onTap: () => Navigator.pushNamed(context, '/watchlist'),
+                    ),
+                    _buildNavigationCard(
+                      title: "Stock Details",
+                      icon: Icons.bar_chart,
+                      color: Colors.orangeAccent,
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/stock_details'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
