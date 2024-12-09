@@ -4,9 +4,15 @@ class NewsfeedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Newsfeed')),
+      appBar: AppBar(
+        title: Text('Newsfeed'),
+        backgroundColor: Colors.blueAccent,
+      ),
       body: Center(
-        child: Text('Financial newsfeed appears here.'),
+        child: Text(
+          'Newsfeed Content Coming Soon!',
+          style: TextStyle(fontSize: 18),
+        ),
       ),
     );
   }

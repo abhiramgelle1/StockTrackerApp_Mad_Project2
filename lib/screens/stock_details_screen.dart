@@ -1,24 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 class StockDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Stock Details')),
+      appBar: AppBar(
+        title: Text('Stock Details'),
+        backgroundColor: Colors.blueAccent,
+      ),
       body: Center(
-        child: LineChart(
-          LineChartData(
-            lineBarsData: [
-              LineChartBarData(
-                spots: [
-                  FlSpot(0, 1),
-                  FlSpot(1, 3),
-                  FlSpot(2, 2),
-                ],
-              ),
-            ],
-          ),
+        child: Text(
+          'Stock Details Content Coming Soon!',
+          style: TextStyle(fontSize: 18),
         ),
       ),
     );
