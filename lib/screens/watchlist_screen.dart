@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class WatchlistScreen extends StatelessWidget {
@@ -7,7 +6,7 @@ class WatchlistScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Watchlist')),
       body: Center(
-        child: Text("Watchlist Screen"),
+        child: Text('Watchlist items appear here.'),
       ),
     );
   }

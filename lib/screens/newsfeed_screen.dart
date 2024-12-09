@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class NewsfeedScreen extends StatelessWidget {
@@ -7,7 +6,7 @@ class NewsfeedScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Newsfeed')),
       body: Center(
-        child: Text("Newsfeed Screen"),
+        child: Text('Financial newsfeed appears here.'),
       ),
     );
   }

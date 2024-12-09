@@ -1,4 +1,4 @@
-package com.example.stocktracker_app_project2
+package com.app.tracker.stock
 
 import io.flutter.embedding.android.FlutterActivity
 
