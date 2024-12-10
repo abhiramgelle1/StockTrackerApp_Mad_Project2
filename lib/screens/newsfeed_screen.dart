@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/finnhub_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NewsfeedScreen extends StatefulWidget {
   @override
@@ -168,8 +169,28 @@ class _NewsfeedScreenState extends State<NewsfeedScreen> {
     );
   }
 
-  void _openArticle(String url) {
-    // Use a package like url_launcher to open the article in a browser
-    print('Opening article: $url'); // Replace with actual code to launch URL
+  void _openArticle(String url) async {
+    final Uri uri = Uri.parse(url);
+
+    try {
+      print('Trying to launch URL: $url');
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        print('URL successfully launched');
+      } else {
+        print('Cannot launch URL: $url');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch the article')),
+        );
+      }
+    } catch (e) {
+      print('Error launching URL: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error opening article: $e')),
+      );
+    }
   }
 }

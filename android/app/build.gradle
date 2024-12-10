@@ -1,11 +1,8 @@
 plugins {
     id "com.android.application"
-    // START: FlutterFire Configuration
-    id 'com.google.gms.google-services'
-    // END: FlutterFire Configuration
-    id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id "dev.flutter.flutter-gradle-plugin"
+    id 'com.google.gms.google-services' // For Firebase and Google services
+    id "kotlin-android" // For Kotlin support
+    id "dev.flutter.flutter-gradle-plugin" // Flutter plugin
 }
 
 android {
@@ -23,21 +20,16 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.app.tracker.stock"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        minSdkVersion = 23
+        minSdkVersion = 23 // Minimum SDK version for the app
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
         }
     }
@@ -45,4 +37,20 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Core Android libraries
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1' // AppCompat dependency for Theme.AppCompat.NoActionBar
+    implementation 'com.google.android.material:material:1.9.0' // For Material Design components
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // Optional for UI layouts
+
+    // Firebase dependencies (if using Firebase services)
+    implementation platform('com.google.firebase:firebase-bom:32.1.1') // Firebase BOM
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+
+    // URL launcher plugin (if using url_launcher package)
+    implementation 'androidx.browser:browser:1.5.0' // Required for URL handling
 }
