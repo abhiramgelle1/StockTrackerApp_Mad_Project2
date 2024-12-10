@@ -14,6 +14,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
   final _auth = FirebaseAuth.instance;
 
+  bool _isLoading = false;
   String _passwordStrength = "";
 
   void _checkPasswordStrength(String password) {
@@ -33,14 +34,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
+    if (_emailController.text.isEmpty ||
+        _usernameController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _phoneController.text.isEmpty) {
+      _showSnackBar("All fields are required!", Colors.red);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
+      // Register user with Firebase
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // Save user details in Firestore
+      // Save user details to Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user?.uid)
@@ -50,15 +64,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'phone': _phoneController.text.trim(),
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration Successful!')),
-      );
-      Navigator.pushReplacementNamed(context, '/');
+      // Show success message
+      _showSnackBar(
+          "Registration Successful! Redirecting to login...", Colors.green);
+
+      // Redirect to login after a delay
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pushReplacementNamed(context, '/');
+      });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration Failed: $e')),
-      );
+      // Show error message
+      _showSnackBar("Registration Failed: ${e.toString()}", Colors.red);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: backgroundColor,
+        ),
+      );
+    });
   }
 
   @override
@@ -90,11 +122,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Text(
                   "Create an Account",
                   style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 SizedBox(height: 40),
+                // Email Field
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -105,6 +139,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 SizedBox(height: 20),
+                // Username Field
                 TextField(
                   controller: _usernameController,
                   decoration: InputDecoration(
@@ -115,6 +150,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 SizedBox(height: 20),
+                // Password Field
                 TextField(
                   controller: _passwordController,
                   decoration: InputDecoration(
@@ -129,9 +165,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(height: 10),
                 Text(
                   "Password Strength: $_passwordStrength",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                    color: _passwordStrength == "Weak"
+                        ? Colors.red
+                        : _passwordStrength == "Medium"
+                            ? Colors.yellow
+                            : Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: 20),
+                // Phone Number Field
                 TextField(
                   controller: _phoneController,
                   decoration: InputDecoration(
@@ -142,17 +186,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 SizedBox(height: 30),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: _register,
-                  child: Text('Register'),
-                ),
+                // Register Button
+                _isLoading
+                    ? CircularProgressIndicator()
+                    : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 15),
+                          backgroundColor: Colors.teal,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: _register,
+                        child: Text(
+                          'Register',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
                 SizedBox(height: 20),
+                // Navigate to Login Button
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacementNamed(context, '/');

@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  "Welcome to Stock Tracker",
+                  "Welcome to Stock Genius",
                   style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
