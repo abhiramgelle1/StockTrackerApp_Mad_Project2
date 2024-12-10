@@ -34,148 +34,128 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Stock Genius'),
-        backgroundColor: Colors.teal,
-      ),
-      drawer: Drawer(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue, Colors.purple],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          // Background Gradient
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue.shade200, Colors.purple.shade700],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
           ),
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                ),
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Colors.teal,
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 40.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // App Logo and Tagline
+                Center(
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        'assets/appLogo.png',
+                        height: 100, // Larger logo
+                        width: 100,
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      userDetails?['username'] ?? "User",
-                      style: TextStyle(fontSize: 20, color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.email, color: Colors.white),
-                title: Text(
-                  'Email',
-                  style: TextStyle(color: Colors.white),
-                ),
-                subtitle: Text(
-                  userDetails?['email'] ?? "N/A",
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.phone, color: Colors.white),
-                title: Text(
-                  'Phone',
-                  style: TextStyle(color: Colors.white),
-                ),
-                subtitle: Text(
-                  userDetails?['phone'] ?? "N/A",
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ),
-              Divider(color: Colors.white54),
-              ListTile(
-                leading: Icon(Icons.logout, color: Colors.redAccent),
-                title: Text(
-                  'Logout',
-                  style: TextStyle(color: Colors.redAccent),
-                ),
-                onTap: () async {
-                  await FirebaseAuth.instance.signOut();
-                  Navigator.pushReplacementNamed(context, '/');
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.teal.shade200, Colors.teal.shade700],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // App Logo
-              Center(
-                child: Image.asset(
-                  'assets/appLogo.png',
-                  height: 100,
-                  width: 100,
-                ),
-              ),
-              SizedBox(height: 20),
-              Center(
-                child: Text(
-                  "Welcome to Stock Genius",
-                  style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-              ),
-              SizedBox(height: 20),
-              Expanded(
-                child: GridView(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16.0,
-                    crossAxisSpacing: 16.0,
+                      SizedBox(height: 10),
+                      Text(
+                        "Stock Genius",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        "Your one-stop stock tracking app",
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
+                      ),
+                    ],
                   ),
-                  children: [
-                    _buildNavigationCard(
-                      title: "Newsfeed",
-                      icon: Icons.article,
-                      color: Colors.blueAccent,
-                      onTap: () => Navigator.pushNamed(context, '/newsfeed'),
-                    ),
-                    _buildNavigationCard(
-                      title: "Watchlist",
-                      icon: Icons.list,
-                      color: Colors.greenAccent,
-                      onTap: () => Navigator.pushNamed(context, '/watchlist'),
-                    ),
-                    _buildNavigationCard(
-                      title: "Stock Details",
-                      icon: Icons.bar_chart,
-                      color: Colors.orangeAccent,
-                      onTap: () =>
-                          Navigator.pushNamed(context, '/stock_details'),
-                    ),
-                  ],
                 ),
-              ),
-            ],
+                SizedBox(height: 40),
+                // Greeting Section
+                Text(
+                  "Hello, ${userDetails?['username'] ?? user?.email ?? 'User'}!",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "What would you like to explore today?",
+                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                ),
+                SizedBox(height: 30),
+                // Navigation Cards Section
+                Expanded(
+                  child: GridView(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    children: [
+                      _buildNavigationCard(
+                        title: "Newsfeed",
+                        icon: Icons.article_outlined,
+                        color: Colors.blueAccent,
+                        onTap: () => Navigator.pushNamed(context, '/newsfeed'),
+                      ),
+                      _buildNavigationCard(
+                        title: "Watchlist",
+                        icon: Icons.favorite_outline,
+                        color: Colors.greenAccent,
+                        onTap: () => Navigator.pushNamed(context, '/watchlist'),
+                      ),
+                      _buildNavigationCard(
+                        title: "Stock Details",
+                        icon: Icons.bar_chart_outlined,
+                        color: Colors.orangeAccent,
+                        onTap: () =>
+                            Navigator.pushNamed(context, '/stock_details'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          // View User Details Section
+          Positioned(
+            bottom: 20,
+            left: 20,
+            child: GestureDetector(
+              onTap: () => _showProfileDetails(context),
+              child: Row(
+                children: [
+                  Icon(Icons.person_outline, color: Colors.white, size: 40),
+                  SizedBox(width: 10),
+                  Text(
+                    "View User Details",
+                    style: TextStyle(fontSize: 16, color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.redAccent,
+        icon: Icon(Icons.logout),
+        label: Text('Logout'),
+        onPressed: () async {
+          await FirebaseAuth.instance.signOut();
+          Navigator.pushReplacementNamed(context, '/');
+        },
       ),
     );
   }
@@ -189,9 +169,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        elevation: 5,
+        elevation: 8,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(20),
         ),
         color: color,
         child: Column(
@@ -209,6 +189,77 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showProfileDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade300, Colors.teal.shade700],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Profile Details",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                Divider(color: Colors.white54),
+                ListTile(
+                  leading: Icon(Icons.email, color: Colors.white),
+                  title: Text('Email', style: TextStyle(color: Colors.white)),
+                  subtitle: Text(userDetails?['email'] ?? "N/A",
+                      style: TextStyle(color: Colors.white70)),
+                ),
+                ListTile(
+                  leading: Icon(Icons.person, color: Colors.white),
+                  title:
+                      Text('Username', style: TextStyle(color: Colors.white)),
+                  subtitle: Text(userDetails?['username'] ?? "N/A",
+                      style: TextStyle(color: Colors.white70)),
+                ),
+                ListTile(
+                  leading: Icon(Icons.phone, color: Colors.white),
+                  title: Text('Phone', style: TextStyle(color: Colors.white)),
+                  subtitle: Text(userDetails?['phone'] ?? "N/A",
+                      style: TextStyle(color: Colors.white70)),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text("Close", style: TextStyle(color: Colors.teal)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

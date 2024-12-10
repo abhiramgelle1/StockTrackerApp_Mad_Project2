@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class FinnhubService {
-  final String apiKey = 'your_finnhub_api_key';
+  final String apiKey = 'ctbm2dhr01qvslqusgv0ctbm2dhr01qvslqusgvg';
 
   Future<Map<String, dynamic>> fetchStockData(String symbol) async {
     final url = Uri.parse(
