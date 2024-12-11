@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/finnhub_service.dart';
 
 class StockDetailsScreen extends StatefulWidget {
@@ -9,9 +11,10 @@ class StockDetailsScreen extends StatefulWidget {
 class _StockDetailsScreenState extends State<StockDetailsScreen> {
   final TextEditingController _stockSymbolController = TextEditingController();
   final FinnhubService _finnhubService = FinnhubService();
-  bool _isLoading = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Default stock symbols
+  bool _isLoading = false;
   final List<String> _defaultStocks = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA'];
   Map<String, Map<String, dynamic>> _stockData = {};
 
@@ -33,7 +36,6 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
         final data = await _finnhubService.fetchStockData(symbol);
         fetchedData[symbol] = data;
       } catch (e) {
-        // Handle errors for individual stocks
         print('Error fetching data for $symbol: $e');
       }
     }
@@ -63,6 +65,42 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching data for $symbol: $e')),
+      );
+    }
+  }
+
+  // Add stock to watchlist
+  Future<void> _addToWatchlist(String symbol) async {
+    final userId = _auth.currentUser?.uid;
+
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User not logged in')),
+      );
+      return;
+    }
+
+    try {
+      final watchlistRef =
+          _firestore.collection('watchlists').doc(userId).collection('stocks');
+
+      final existingStock =
+          await watchlistRef.where('symbol', isEqualTo: symbol).get();
+
+      if (existingStock.docs.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$symbol is already in your watchlist')),
+        );
+        return;
+      }
+
+      await watchlistRef.add({'symbol': symbol});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$symbol added to watchlist')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding to watchlist: $e')),
       );
     }
   }
@@ -139,18 +177,16 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
         borderRadius: BorderRadius.circular(15),
       ),
       margin: const EdgeInsets.symmetric(vertical: 10),
-      color: Colors.black87,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Stock Image
           ClipRRect(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(15),
               topRight: Radius.circular(15),
             ),
             child: Image.asset(
-              'assets/stock_image.png', // Placeholder graph image
+              'assets/stock_image.png',
               height: 100,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -161,20 +197,30 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Stock Symbol
                 Text(
                   symbol,
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
                   ),
                 ),
-                Divider(color: Colors.white54),
+                Divider(color: Colors.grey),
                 _buildStockDetailRow('Current Price', '\$${data['c']}'),
                 _buildStockDetailRow('High Price', '\$${data['h']}'),
                 _buildStockDetailRow('Low Price', '\$${data['l']}'),
                 _buildStockDetailRow('Previous Close', '\$${data['pc']}'),
+                SizedBox(height: 10),
+                ElevatedButton.icon(
+                  onPressed: () => _addToWatchlist(symbol),
+                  icon: Icon(Icons.add),
+                  label: Text('Add to Watchlist'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
