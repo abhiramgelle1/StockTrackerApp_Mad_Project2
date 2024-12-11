@@ -26,7 +26,6 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
     _fetchWatchlist();
   }
 
-  // Fetch user's watchlist
   Future<void> _fetchWatchlist() async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return;
@@ -47,7 +46,6 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
     }
   }
 
-  // Fetch data for default stocks
   Future<void> _fetchDefaultStocks() async {
     setState(() {
       _isLoading = true;
@@ -69,30 +67,6 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
     });
   }
 
-  // Fetch data for a specific stock
-  Future<void> _fetchStockDetails(String symbol) async {
-    setState(() {
-      _isLoading = true;
-      _stockData = {}; // Clear previous results
-    });
-
-    try {
-      final data = await _finnhubService.fetchStockData(symbol);
-      setState(() {
-        _stockData[symbol] = data;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching data for $symbol: $e')),
-      );
-    }
-  }
-
-  // Toggle watchlist status
   Future<void> _toggleWatchlist(String symbol) async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return;
@@ -102,7 +76,6 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
           _firestore.collection('watchlists').doc(userId).collection('stocks');
 
       if (_watchlist.contains(symbol)) {
-        // Remove from watchlist
         final existingStock =
             await watchlistRef.where('symbol', isEqualTo: symbol).get();
         for (var doc in existingStock.docs) {
@@ -117,7 +90,6 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
           SnackBar(content: Text('$symbol removed from watchlist')),
         );
       } else {
-        // Add to watchlist
         await watchlistRef.add({'symbol': symbol});
         setState(() {
           _watchlist.add(symbol);
@@ -153,7 +125,6 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Search Bar
               TextField(
                 controller: _stockSymbolController,
                 decoration: InputDecoration(
@@ -165,7 +136,7 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
                     icon: Icon(Icons.search, color: Colors.teal),
                     onPressed: () {
                       if (_stockSymbolController.text.isNotEmpty) {
-                        _fetchStockDetails(_stockSymbolController.text.trim());
+                        _fetchDefaultStocks();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -177,7 +148,6 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              // Loading Indicator or Stock Data
               _isLoading
                   ? CircularProgressIndicator()
                   : Expanded(
@@ -239,20 +209,34 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
                 _buildStockDetailRow('Low Price', '\$${data['l']}'),
                 _buildStockDetailRow('Previous Close', '\$${data['pc']}'),
                 SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: IconButton(
-                    icon: Icon(
-                      _watchlist.contains(symbol)
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: _watchlist.contains(symbol)
-                          ? Colors.red
-                          : Colors.grey,
-                      size: 30,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        _watchlist.contains(symbol)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: _watchlist.contains(symbol)
+                            ? Colors.red
+                            : Colors.grey,
+                        size: 30,
+                      ),
+                      onPressed: () => _toggleWatchlist(symbol),
                     ),
-                    onPressed: () => _toggleWatchlist(symbol),
-                  ),
+                    Text(
+                      _watchlist.contains(symbol)
+                          ? 'Added to Watchlist'
+                          : 'Add to Watchlist',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: _watchlist.contains(symbol)
+                            ? Colors.green
+                            : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
