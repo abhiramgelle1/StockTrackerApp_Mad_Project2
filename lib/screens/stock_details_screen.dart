@@ -224,54 +224,73 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
         borderRadius: BorderRadius.circular(15),
       ),
       margin: const EdgeInsets.symmetric(vertical: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              symbol,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Stock Image
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
             ),
-            Divider(color: Colors.grey),
-            _buildStockDetailRow('Current Price', '\$${data['c']}'),
-            _buildStockDetailRow('High Price', '\$${data['h']}'),
-            _buildStockDetailRow('Low Price', '\$${data['l']}'),
-            _buildStockDetailRow('Previous Close', '\$${data['pc']}'),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Image.asset(
+              'assets/stock_image.png', // Placeholder image for stock
+              height: 150,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  icon: Icon(
-                    _watchlist.contains(symbol)
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    color:
-                        _watchlist.contains(symbol) ? Colors.red : Colors.grey,
-                    size: 30,
-                  ),
-                  onPressed: () => _toggleWatchlist(symbol),
-                ),
                 Text(
-                  _watchlist.contains(symbol)
-                      ? 'Added to Watchlist'
-                      : 'Add to Watchlist',
+                  symbol,
                   style: TextStyle(
-                    fontSize: 16,
-                    color: _watchlist.contains(symbol)
-                        ? Colors.green
-                        : Colors.grey,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                Divider(color: Colors.grey),
+                _buildStockDetailRow('Current Price', '\$${data['c']}'),
+                _buildStockDetailRow('High Price', '\$${data['h']}'),
+                _buildStockDetailRow('Low Price', '\$${data['l']}'),
+                _buildStockDetailRow('Previous Close', '\$${data['pc']}'),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        _watchlist.contains(symbol)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: _watchlist.contains(symbol)
+                            ? Colors.red
+                            : Colors.grey,
+                        size: 30,
+                      ),
+                      onPressed: () => _toggleWatchlist(symbol),
+                    ),
+                    Text(
+                      _watchlist.contains(symbol)
+                          ? 'Added to Watchlist'
+                          : 'Add to Watchlist',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: _watchlist.contains(symbol)
+                            ? Colors.green
+                            : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
