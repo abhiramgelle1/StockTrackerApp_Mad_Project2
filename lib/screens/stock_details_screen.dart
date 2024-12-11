@@ -17,11 +17,34 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
   bool _isLoading = false;
   final List<String> _defaultStocks = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA'];
   Map<String, Map<String, dynamic>> _stockData = {};
+  Set<String> _watchlist = {};
 
   @override
   void initState() {
     super.initState();
     _fetchDefaultStocks();
+    _fetchWatchlist();
+  }
+
+  // Fetch user's watchlist
+  Future<void> _fetchWatchlist() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    try {
+      final snapshot = await _firestore
+          .collection('watchlists')
+          .doc(userId)
+          .collection('stocks')
+          .get();
+
+      setState(() {
+        _watchlist =
+            snapshot.docs.map((doc) => doc['symbol'] as String).toSet();
+      });
+    } catch (e) {
+      print('Error fetching watchlist: $e');
+    }
   }
 
   // Fetch data for default stocks
@@ -69,38 +92,44 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
     }
   }
 
-  // Add stock to watchlist
-  Future<void> _addToWatchlist(String symbol) async {
+  // Toggle watchlist status
+  Future<void> _toggleWatchlist(String symbol) async {
     final userId = _auth.currentUser?.uid;
-
-    if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User not logged in')),
-      );
-      return;
-    }
+    if (userId == null) return;
 
     try {
       final watchlistRef =
           _firestore.collection('watchlists').doc(userId).collection('stocks');
 
-      final existingStock =
-          await watchlistRef.where('symbol', isEqualTo: symbol).get();
+      if (_watchlist.contains(symbol)) {
+        // Remove from watchlist
+        final existingStock =
+            await watchlistRef.where('symbol', isEqualTo: symbol).get();
+        for (var doc in existingStock.docs) {
+          await doc.reference.delete();
+        }
 
-      if (existingStock.docs.isNotEmpty) {
+        setState(() {
+          _watchlist.remove(symbol);
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$symbol is already in your watchlist')),
+          SnackBar(content: Text('$symbol removed from watchlist')),
         );
-        return;
-      }
+      } else {
+        // Add to watchlist
+        await watchlistRef.add({'symbol': symbol});
+        setState(() {
+          _watchlist.add(symbol);
+        });
 
-      await watchlistRef.add({'symbol': symbol});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$symbol added to watchlist')),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$symbol added to watchlist')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding to watchlist: $e')),
+        SnackBar(content: Text('Error updating watchlist: $e')),
       );
     }
   }
@@ -210,15 +239,19 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
                 _buildStockDetailRow('Low Price', '\$${data['l']}'),
                 _buildStockDetailRow('Previous Close', '\$${data['pc']}'),
                 SizedBox(height: 10),
-                ElevatedButton.icon(
-                  onPressed: () => _addToWatchlist(symbol),
-                  icon: Icon(Icons.add),
-                  label: Text('Add to Watchlist'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: IconButton(
+                    icon: Icon(
+                      _watchlist.contains(symbol)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: _watchlist.contains(symbol)
+                          ? Colors.red
+                          : Colors.grey,
+                      size: 30,
                     ),
+                    onPressed: () => _toggleWatchlist(symbol),
                   ),
                 ),
               ],
