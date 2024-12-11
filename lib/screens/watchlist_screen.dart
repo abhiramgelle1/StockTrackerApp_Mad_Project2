@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'stock_details_screen.dart'; // Import StockDetailsScreen
 
 class WatchlistScreen extends StatefulWidget {
   @override
@@ -118,30 +119,45 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
   }
 
   Widget _buildStockCard(Map<String, dynamic> stock) {
-    return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.teal,
-          child: Text(
-            stock['symbol'][0],
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StockDetailsScreen(
+                initialSymbol: stock['symbol']), // Pass the stock symbol
+          ),
+        );
+      },
+      child: Card(
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: Colors.teal,
+            child: Text(
+              stock['symbol'][0],
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-        title: Text(
-          stock['symbol'],
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        trailing: IconButton(
-          icon: Icon(Icons.delete, color: Colors.red),
-          onPressed: () => _removeStock(stock['id']),
+          title: Text(
+            stock['symbol'],
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          trailing: IconButton(
+            icon: Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _removeStock(stock['id']),
+          ),
+          subtitle: Text(
+            'Tap to view details',
+            style: TextStyle(color: Colors.grey),
+          ),
         ),
       ),
     );

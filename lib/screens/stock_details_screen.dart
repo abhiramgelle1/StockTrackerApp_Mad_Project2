@@ -4,6 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/finnhub_service.dart';
 
 class StockDetailsScreen extends StatefulWidget {
+  final String? initialSymbol;
+
+  StockDetailsScreen({this.initialSymbol});
+
   @override
   _StockDetailsScreenState createState() => _StockDetailsScreenState();
 }
@@ -22,10 +26,16 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchDefaultStocks();
     _fetchWatchlist();
+
+    if (widget.initialSymbol != null) {
+      _fetchStockDetails(widget.initialSymbol!);
+    } else {
+      _fetchDefaultStocks();
+    }
   }
 
+  // Fetch Watchlist
   Future<void> _fetchWatchlist() async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return;
@@ -46,6 +56,7 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
     }
   }
 
+  // Fetch Default Stocks
   Future<void> _fetchDefaultStocks() async {
     setState(() {
       _isLoading = true;
@@ -67,6 +78,38 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
     });
   }
 
+  // Fetch Specific Stock
+  Future<void> _fetchStockDetails(String symbol) async {
+    if (symbol.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a stock symbol')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _stockData = {}; // Clear previous data
+    });
+
+    try {
+      final data =
+          await _finnhubService.fetchStockData(symbol.trim().toUpperCase());
+      setState(() {
+        _stockData = {symbol: data}; // Display only searched stock
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching data for $symbol: $e')),
+      );
+    }
+  }
+
+  // Toggle Watchlist
   Future<void> _toggleWatchlist(String symbol) async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return;
@@ -125,6 +168,7 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              // Search Bar
               TextField(
                 controller: _stockSymbolController,
                 decoration: InputDecoration(
@@ -135,31 +179,35 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
                   suffixIcon: IconButton(
                     icon: Icon(Icons.search, color: Colors.teal),
                     onPressed: () {
-                      if (_stockSymbolController.text.isNotEmpty) {
-                        _fetchDefaultStocks();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('Please enter a stock symbol')),
-                        );
-                      }
+                      _fetchStockDetails(_stockSymbolController.text.trim());
                     },
                   ),
                 ),
               ),
               SizedBox(height: 20),
+              // Display Loading Indicator or Stock Data
               _isLoading
                   ? CircularProgressIndicator()
-                  : Expanded(
-                      child: ListView.builder(
-                        itemCount: _stockData.keys.length,
-                        itemBuilder: (context, index) {
-                          final symbol = _stockData.keys.elementAt(index);
-                          final data = _stockData[symbol];
-                          return _buildStockCard(symbol, data);
-                        },
-                      ),
-                    ),
+                  : _stockData.isNotEmpty
+                      ? Expanded(
+                          child: ListView.builder(
+                            itemCount: _stockData.keys.length,
+                            itemBuilder: (context, index) {
+                              final symbol = _stockData.keys.elementAt(index);
+                              final data = _stockData[symbol];
+                              return _buildStockCard(symbol, data);
+                            },
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            'No stock data available.',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
             ],
           ),
         ),
@@ -176,72 +224,54 @@ class _StockDetailsScreenState extends State<StockDetailsScreen> {
         borderRadius: BorderRadius.circular(15),
       ),
       margin: const EdgeInsets.symmetric(vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(15),
-              topRight: Radius.circular(15),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              symbol,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            child: Image.asset(
-              'assets/stock_image.png',
-              height: 100,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Divider(color: Colors.grey),
+            _buildStockDetailRow('Current Price', '\$${data['c']}'),
+            _buildStockDetailRow('High Price', '\$${data['h']}'),
+            _buildStockDetailRow('Low Price', '\$${data['l']}'),
+            _buildStockDetailRow('Previous Close', '\$${data['pc']}'),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                IconButton(
+                  icon: Icon(
+                    _watchlist.contains(symbol)
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                    color:
+                        _watchlist.contains(symbol) ? Colors.red : Colors.grey,
+                    size: 30,
+                  ),
+                  onPressed: () => _toggleWatchlist(symbol),
+                ),
                 Text(
-                  symbol,
+                  _watchlist.contains(symbol)
+                      ? 'Added to Watchlist'
+                      : 'Add to Watchlist',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 16,
+                    color: _watchlist.contains(symbol)
+                        ? Colors.green
+                        : Colors.grey,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Divider(color: Colors.grey),
-                _buildStockDetailRow('Current Price', '\$${data['c']}'),
-                _buildStockDetailRow('High Price', '\$${data['h']}'),
-                _buildStockDetailRow('Low Price', '\$${data['l']}'),
-                _buildStockDetailRow('Previous Close', '\$${data['pc']}'),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        _watchlist.contains(symbol)
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: _watchlist.contains(symbol)
-                            ? Colors.red
-                            : Colors.grey,
-                        size: 30,
-                      ),
-                      onPressed: () => _toggleWatchlist(symbol),
-                    ),
-                    Text(
-                      _watchlist.contains(symbol)
-                          ? 'Added to Watchlist'
-                          : 'Add to Watchlist',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _watchlist.contains(symbol)
-                            ? Colors.green
-                            : Colors.grey,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
